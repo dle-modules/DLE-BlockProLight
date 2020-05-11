@@ -7,7 +7,6 @@
 ![License](https://img.shields.io/github/license/dle-modules/DLE-BlockProLight?style=flat-square)
 
 ## Установка модуля
-
 1. Установить модуль [DLE-BlockPro](https://github.com/dle-modules/DLE-BlockPro/releases/latest) (требуется для работы).
 2. Устанавливаем как обычный плагин, файл **blockpro_light_plugin.zip** содержит всё необходимое для автоматической установки.
 
