@@ -24,8 +24,7 @@ if (!defined('DATALIFEENGINE')) {
 
 /** @var bool $showstat */
 if ($showstat) {
-    $start  = microtime(true);
-    $dbStat = '';
+    $start = microtime(true);
 }
 /**
  * Конфиг модуля
@@ -72,7 +71,6 @@ if ($cfg['cacheVars']) {
         }
     }
 }
-
 
 
 // Поддержка модуля multiLang
@@ -128,35 +126,8 @@ if ($cfg['cacheLive']) {
     $cfg['cachePrefix'] = 'base';
 }
 
-// Определяемся с правильным шаблоном сайта
+// Определяемся с правильным шаблоном сайта (для этого модуля он всегда равен текущему `$config['skin']`)
 $currentSiteSkin = $config['skin'];
-
-if($isAjaxConfig) {
-    if ($_REQUEST['skin']) {
-        echo '<pre class="dle-pre">skin: ';
-        print_r($_REQUEST['skin']);
-        echo '</pre>';
-        $_REQUEST['skin'] = $_REQUEST['dle_skin'] = trim(totranslit($_REQUEST['skin'], false, false));
-    }
-
-    if ($_REQUEST['dle_skin']) {
-        echo '<pre class="dle-pre">dle_skin: ';
-        print_r($_REQUEST['dle_skin']);
-        echo '</pre>';
-        $_REQUEST['dle_skin'] = trim(totranslit($_REQUEST['dle_skin'], false, false));
-        if ($_REQUEST['dle_skin'] AND @is_dir(ROOT_DIR.'/templates/'.$_REQUEST['dle_skin'])) {
-            $currentSiteSkin = $_REQUEST['dle_skin'];
-        }
-    } elseif ($_COOKIE['dle_skin']) {
-        echo '<pre class="dle-pre">kookies: ';
-        print_r($_COOKIE['dle_skin']);
-        echo '</pre>';
-        $_COOKIE['dle_skin'] = trim(totranslit((string)$_COOKIE['dle_skin'], false, false));
-        if ($_COOKIE['dle_skin'] AND is_dir(ROOT_DIR.'/templates/'.$_COOKIE['dle_skin'])) {
-            $currentSiteSkin = $_COOKIE['dle_skin'];
-        }
-    }
-}
 
 // Формируем имя кеша
 $cacheName = implode('_', $cfg).$currentSiteSkin;
@@ -377,7 +348,7 @@ if (!$output) {
 
     // Результат обработки шаблона
     try {
-        $output = $base->tpl->fetch($currentSiteSkin . '/' . $base->cfg['template'].'.tpl', $tplArr);
+        $output = $base->tpl->fetch($base->dle_config['skin'].'/'.$base->cfg['template'].'.tpl', $tplArr);
     } catch (Exception $e) {
         $outputLog['errors'][] = $e->getMessage();
         $base->cfg['nocache']  = true;
@@ -386,22 +357,6 @@ if (!$output) {
     // Если есть ошбки и включен вывод статистики — оключаем кеш.
     if (count($outputLog['errors']) > 0 && $cfg['showstat']) {
         $base->cfg['nocache'] = true;
-    }
-
-    // Формируем данные о запросах для статистики, если требуется
-    if ($base->cfg['showstat'] && $user_group[$member_id['user_group']]['allow_all_edit']) {
-        $statQ = [];
-
-        foreach ($stat as $i => $q) {
-            $statQ['q'] .= '<br>'.'<b>['.($i + 1).']</b> '.$q['query'].' <br>['.($i + 1).' время:] <b>'.$q['timer']
-                .'</b>';
-            $statQ['t'] += $q['timer'];
-        }
-        if (isset($statQ['q'])) {
-            $dbStat = 'Запрос(ы): '.$statQ['q'].'<br>Время выполнения запросов: <b>'.$statQ['t'].'</b><br>';
-        }
-
-        unset($stat);
     }
 
     // Создаём кеш, если требуется
@@ -430,27 +385,24 @@ if ($user_group[$member_id['user_group']]['allow_hide']) {
 }
 
 // Результат работы модуля
-/** @var boolean $external */
-if (!$external) {
-    // Если блок не является внешним - выводим на печать
-    if (count($outputLog['errors']) > 0) {
-        // Выводим ошибки, если они есть
-        $outputErrors = [];
-        $outputErrors[]
-                      = '<ul class="bp-errors" style="border: solid 1px red; padding: 5px; margin: 5px 0; list-style: none; background: rgba(255,0,0,0.2)">';
+// Если блок не является внешним - выводим на печать
+if (count($outputLog['errors']) > 0) {
+    // Выводим ошибки, если они есть
+    $outputErrors = [];
+    $outputErrors[]
+                  = '<ul class="bp-errors" style="border: solid 1px red; padding: 5px; margin: 5px 0; list-style: none; background: rgba(255,0,0,0.2)">';
 
-        foreach ($outputLog['errors'] as $errorText) {
-            $outputErrors[] = '<li>'.$errorText.'</li>';
-        }
-        $outputErrors[] = '</ul>';
-
-        $outputErrors = implode('', $outputErrors);
-
-        echo $outputErrors;
-    } else {
-        // Если нет ошибок - выводим результат аботы модуля
-        echo $output;
+    foreach ($outputLog['errors'] as $errorText) {
+        $outputErrors[] = '<li>'.$errorText.'</li>';
     }
+    $outputErrors[] = '</ul>';
+
+    $outputErrors = implode('', $outputErrors);
+
+    echo $outputErrors;
+} else {
+    // Если нет ошибок - выводим результат аботы модуля
+    echo $output;
 }
 
 // Показываем стстаистику выполнения скрипта, если требуется
@@ -461,7 +413,6 @@ if ($cfg['showstat'] && $user_group[$member_id['user_group']]['allow_all_edit'])
             / (1024 * 1024), 2).'Мб </b>' : '';
     // Вывод статистики
     /** @var integer $start */
-    /** @var string $dbStat */
-    echo '<div class="bp-statistics" style="border: solid 1px red; padding: 5px; margin: 5px 0;">'.$dbStat
-        .'Время выполнения скрипта: <b>'.round((microtime(true) - $start), 6).'</b> c.'.$mem_usg.'</div>';
+    echo '<div class="bp-statistics" style="border: solid 1px red; padding: 5px; margin: 5px 0;">Время выполнения скрипта: <b>'
+        .round((microtime(true) - $start), 6).'</b> c.'.$mem_usg.'</div>';
 }

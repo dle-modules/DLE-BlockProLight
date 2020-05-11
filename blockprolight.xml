@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dleplugin>
+	<name>BlockProLight</name>
+	<description>Облегченная версия модуля BlockPro.
+Предназначен для вывода существующего списка новостей через шаблон модуля вместо стандартных шаблонов.</description>
+	<icon>engine/skins/images/blockpro.png</icon>
+	<version>1.1.0</version>
+	<dleversion>13</dleversion>
+	<versioncompare>greater</versioncompare>
+	<upgradeurl>https://updates.pafnuty.name/check-bplight.php</upgradeurl>
+	<filedelete>0</filedelete>
+	<needplugin>BlockPro</needplugin>
+	<mnotice>1</mnotice>
+	<mysqlinstall><![CDATA[]]></mysqlinstall>
+	<mysqlupgrade><![CDATA[]]></mysqlupgrade>
+	<mysqlenable><![CDATA[]]></mysqlenable>
+	<mysqldisable><![CDATA[]]></mysqldisable>
+	<mysqldelete><![CDATA[]]></mysqldelete>
+	<phpinstall><![CDATA[]]></phpinstall>
+	<phpupgrade><![CDATA[]]></phpupgrade>
+	<phpenable><![CDATA[]]></phpenable>
+	<phpdisable><![CDATA[]]></phpdisable>
+	<phpdelete><![CDATA[]]></phpdelete>
+	<notice><![CDATA[<a href="https://github.com/dle-modules/DLE-BlockProLight/releases/latest" target="_blank">Release notes</a> | <a href="https://github.com/dle-modules/DLE-BlockProLight/blob/master/README.md" target="_blank">Readme</a>]]></notice>
+	<file name="engine/engine.php">
+		<operation action="after">
+			<searchcode><![CDATA[$short_news_cache = false;]]></searchcode>
+			<replacecode><![CDATA[// DLE-BlockProLight start
+$bpNewsList = [];
+// DLE-BlockProLight end]]></replacecode>
+		</operation>
+	</file>
+	<file name="engine/modules/show.short.php">
+		<operation action="before">
+			<searchcode><![CDATA[if( stripos( $tpl->copy_template, "[xf" ) !== false OR stripos( $tpl->copy_template, "[ifxf" ) !== false ) {]]></searchcode>
+			<replacecode><![CDATA[// DLE-BlockproLight start
+    // По умолчанию вывод через модуль отключен.
+    $blockpro_enabled = false;
+	// Пустой массив для новостей blockpro
+    $bpNewsList = [];
+
+    // Если в шаблоне есть тег {blockpro-light} - значит нужно включить модуль.
+    if (stripos($tpl->copy_template, "{blockpro-light") !== false) {
+        $blockpro_enabled = true;
+
+        // Сохраняем список новостей как переменную для blockpro
+        $bpNewsList = $db->super_query($sql_select, true);
+
+        // Проверяем, что что-то есть
+        $news_found = count($bpNewsList) > 1;
+
+        if ($news_found) {
+            $arBpParams = [];
+            $bpParams   = '';
+
+            // Если в теге есть параметры, значит надо их учесть.
+            // Например `{blockpro-light params="nocache=y&showstat=y"}`
+            if (preg_match("#{blockpro-light params=['\"](.+?)['\"]#i", $tpl->copy_template, $match)) {
+                $_bpParams = explode('&', $match[1]);
+
+                foreach ($_bpParams as $bpParam) {
+                    $_param = explode('=', $bpParam);
+                    if ($_param[1]) {
+                        $arBpParams[$_param[0]] = $_param[1];
+                    }
+                }
+            }
+
+            // Если в параметрах нет  шаблона, добавим тот, что указан для категории, но из папки blockpro
+            if (!$arBpParams['template']) {
+                // Шаблон по умолчанию
+                $bpTplName = 'shortstory';
+
+                // Если для категории задан другой шаблон, подставим его
+                if ($category_id and $cat_info[$category_id]['short_tpl'] != '') {
+                    $bpTplName = $cat_info[$category_id]['short_tpl'];
+                }
+
+                $arBpParams['template'] = 'blockpro/'.$bpTplName;
+            }
+
+            $_pbParams = [];
+            foreach ($arBpParams as $key => $value) {
+                $_pbParams[] = $key.'='.$value;
+            }
+            $bpParams = implode('&', $_pbParams);
+
+            unset($_pbParams);
+            unset($arBpParams);
+
+            // Строка для загрузки модуля
+            $bpTplString = 'engine/modules/base/blockpro.light.php?'.$bpParams;
+
+            // Строка для подстановки в шаблон, что бы загрузить модуль через штатные средства DLE
+            $tplIncludeString = '{include file="'.$bpTplString.'"}';
+
+            // Делаем одинаковыми переменные copy_template и template для того, что бы DLE не отстрелил `Filtered`
+            $tpl->copy_template = $tpl->template = $tplIncludeString;
+
+            // Массив, который будем передавать
+            $tplArr = ['', $bpTplString];
+            // Установим корректный include_mode
+            $tpl->include_mode = 'php';
+
+            // load_file вернёт уже скомпиленный код, поэтому можно сразу закинуть его в result
+            $tpl->result['content'] = $tpl->load_file($tplArr);
+        }
+
+    }
+
+    if (!$blockpro_enabled) {
+    // DLE-BlockproLight end]]></replacecode>
+		</operation>
+		<operation action="before">
+			<searchcode><![CDATA[$tpl->clear();]]></searchcode>
+			<replacecode><![CDATA[// DLE-BlockproLight start
+        // Закрывающая скобка для условия `if (!$blockpro_enabled) {` разсположенного выше по коду
+    }
+    // DLE-BlockproLight end]]></replacecode>
+			<searchcount>1</searchcount>
+			<replacecount>1</replacecount>
+		</operation>
+	</file>
+</dleplugin>
