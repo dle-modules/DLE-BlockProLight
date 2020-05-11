@@ -1,9 +1,11 @@
 # DLE-BlockProLight
-Облегченная версия модуля DLE-BlockPro для замены вывода новостей через shortstory.
-Внимание, модуль работает только для вывода кратких новостей (вместо shortstory.tpl)
-
+![Release version](https://img.shields.io/github/v/release/dle-modules/DLE-BlockProLight?style=flat-square&v=1)
 ![DLE](https://img.shields.io/badge/DLE-13.x-green.svg?style=flat-square "DLE Version")
 ![License](https://img.shields.io/github/license/dle-modules/DLE-BlockProLight?style=flat-square)
+
+Облегченная версия модуля DLE-BlockPro для замены вывода новостей через shortstory.
+### Внимание!
+Модуль работает только для вывода кратких новостей (вместо shortstory.tpl)
 
 ## Установка модуля
 1. Установить модуль [DLE-BlockPro](https://github.com/dle-modules/DLE-BlockPro/releases/latest) (требуется для работы).
