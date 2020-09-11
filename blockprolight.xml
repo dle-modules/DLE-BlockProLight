@@ -2,9 +2,9 @@
 <dleplugin>
 	<name>BlockProLight</name>
 	<description>Облегченная версия модуля BlockPro.
-Предназначен для вывода существующего списка новостей через шаблон модуля вместо стандартных шаблонов.</description>
+		Предназначен для вывода существующего списка новостей через шаблон модуля вместо стандартных шаблонов.</description>
 	<icon>engine/skins/images/blockpro.png</icon>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 	<dleversion>13</dleversion>
 	<versioncompare>greater</versioncompare>
 	<upgradeurl>https://updates.pafnuty.name/check-bplight.php</upgradeurl>
@@ -32,7 +32,7 @@ $bpNewsList = [];
 	</file>
 	<file name="engine/modules/show.short.php">
 		<operation action="before">
-			<searchcode><![CDATA[if( stripos( $tpl->copy_template, "[xf" ) !== false OR stripos( $tpl->copy_template, "[ifxf" ) !== false ) {]]></searchcode>
+			<searchcode><![CDATA[if( stripos( $tpl->copy_template, "[xf" ) !== false OR stripos( $tpl->copy_template, "[if]]></searchcode>
 			<replacecode><![CDATA[// DLE-BlockproLight start
     // По умолчанию вывод через модуль отключен.
     $blockpro_enabled = false;
