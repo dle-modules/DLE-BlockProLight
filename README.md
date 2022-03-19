@@ -1,6 +1,6 @@
 # DLE-BlockProLight
 ![Release version](https://img.shields.io/github/v/release/dle-modules/DLE-BlockProLight?style=flat-square&v=1)
-![DLE](https://img.shields.io/badge/DLE-13.x-green.svg?style=flat-square "DLE Version")
+![DLE](https://img.shields.io/badge/DLE-15.x-green.svg?style=flat-square "DLE Version")
 ![License](https://img.shields.io/github/license/dle-modules/DLE-BlockProLight?style=flat-square)
 
 Облегченная версия модуля DLE-BlockPro для замены вывода новостей через shortstory.
